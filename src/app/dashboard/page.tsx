@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import StatsSummary from "@/components/dashboard/stats-summary";
 import RecentWorkouts from "@/components/dashboard/recent-workouts";
 import ProgressBar from "@/components/progress-bar";
-import Profile from "@/components/profile";
+import ProfileBanner from "@/components/profile-banner";
 
 const mockUserStats = {
   weight: 78, // kg
@@ -34,7 +34,8 @@ const userData = {
   name: "Jessica",
   goalMessage:
     "Welcome back! You're on track to achieve your goal of losing 3 lbs by June 14",
-  avatarUrl: "https://e7.pngegg.com/pngimages/84/165/png-clipart-united-states-avatar-organization-information-user-avatar-service-computer-wallpaper-thumbnail.png", // Path to your image in the public folder
+  avatarUrl:
+    "https://e7.pngegg.com/pngimages/84/165/png-clipart-united-states-avatar-organization-information-user-avatar-service-computer-wallpaper-thumbnail.png", // Path to your image in the public folder
 };
 
 export default function Dashboard() {
@@ -43,7 +44,6 @@ export default function Dashboard() {
   const router = useRouter();
 
   useEffect(() => {
-
     const fetchData = async () => {
       await new Promise((resolve) => setTimeout(resolve, 500));
       setIsLoading(false);
@@ -73,11 +73,7 @@ export default function Dashboard() {
       <h1 className="text-xl font-bold mb-6">Dashboard</h1>
 
       <div className="grid gap-4 mb-6">
-        <Profile
-          name={userData.name}
-          goalMessage={userData.goalMessage}
-          avatarUrl={userData.avatarUrl}
-        />
+        <ProfileBanner />
       </div>
 
       <div className="grid gap-4 mb-6">
@@ -104,8 +100,6 @@ export default function Dashboard() {
           <span className="mr-2">+</span> Add Workout
         </button>
       </div>
-
-
     </main>
   );
 }

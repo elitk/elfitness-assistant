@@ -1,19 +1,38 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import Link from 'next/link';
 // import { Dumbbell } from 'lucide-react';
 import NavLink from './NavLink';
+import { useRouter } from 'next/navigation'
+import { supabase } from '@/lib/supabase/client';
+
 
 export default function NavBar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-
+  const router = useRouter()
+  
+  
   const navItems = [
     { href: '/dashboard', label: 'Dashboard' },
     { href: '/workouts', label: 'Workouts' },
     { href: '/progress', label: 'Progress' },
     { href: '/profile', label: 'Profile' },
   ];
+  
+  const handleLogout = useCallback(async () => {
+  
+    await supabase.auth.signOut();
+    await fetch('/auth/signout', { method: 'POST', credentials: 'include' });
+
+    // 2 – clean up anything you stored locally
+    localStorage.removeItem('fitnessCoachUserId')
+    sessionStorage.clear()
+
+    // 3 – re-render RSCs with the fresh (logged-out) state
+    router.replace('/login');
+
+  }, [router])
 
   return (
     <nav className="bg-[#121417] text-white py-4 px-6">
@@ -33,6 +52,12 @@ export default function NavBar() {
           ))}
           <button className="bg-[#0D69F2] hover:bg-blue-600 px-4 py-2 rounded-md font-medium transition-colors">
             Upgrade
+          </button>
+          <button
+            onClick={handleLogout}
+            className="px-4 py-2 rounded-md font-medium transition-colors border border-white/20 hover:bg-white/10"
+          >
+            Logout
           </button>
         </div>
 
@@ -63,6 +88,12 @@ export default function NavBar() {
           ))}
           <button className="w-full bg-[#0D69F2] hover:bg-blue-600 px-4 py-2 rounded-md font-medium transition-colors mt-3">
             Upgrade
+          </button>
+          <button
+            onClick={handleLogout}
+            className="px-4 py-2 rounded-md font-medium transition-colors border border-white/20 hover:bg-white/10"
+          >
+            Logout
           </button>
         </div>
       )}
