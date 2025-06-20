@@ -1,67 +1,57 @@
-import { supabase  } from '@/lib/supabase/client'
+// src/lib/api.ts
+import { auth, db } from "@/lib/firebase/firebaseClient";
+import {
+  GoogleAuthProvider,
+  FacebookAuthProvider,
+  GithubAuthProvider,
+  signInWithPopup,
+  signOut as firebaseSignOut,
+} from "firebase/auth";
+import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 
-
-
-export async function signIn(email: string, password: string) {
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-  return { data, error };
-}
-
-export async function signOut() {
-  const { error } = await supabase.auth.signOut();
-  return { error };
-}
-
-// src/lib/api.ts - Add/update these functions
-
-export async function signUp(email: string, password: string, userData: { name: string }) {
-  const { data, error } = await supabase.auth.signUp({ 
-    email, 
-    password,
-    options: {
-      data: {
-        full_name: userData.name
-      }
+export async function signInWithOAuth(
+  provider: "google" | "facebook" | "github"
+) {
+  try {
+    let firebaseProvider;
+    switch (provider) {
+      case "google":
+        firebaseProvider = new GoogleAuthProvider();
+        break;
+      case "facebook":
+        firebaseProvider = new FacebookAuthProvider();
+        break;
+      case "github":
+        firebaseProvider = new GithubAuthProvider();
+        break;
     }
-  });
-  
-  if (data.user && !error) {
-    // Create initial profile
-    await supabase.from('profiles').insert({
-      id: data.user.id,
-      name: userData.name,
-      created_at: new Date().toISOString()
-    });
-  }
-  
-  return { data, error };
-}
 
-export async function signInWithOAuth(provider: 'google' | 'github' | 'facebook') {
-  const { data, error } = await supabase.auth.signInWithOAuth({
-    provider,
-    options: {
-      redirectTo: `${window.location.origin}/auth/callback`,
-      skipBrowserRedirect: false,
-      queryParams: {
-        access_type: 'offline',
-        prompt: 'consent',
+    const result = await signInWithPopup(auth, firebaseProvider);
+    const user = result.user;
+
+    // Create/update profile in Firestore
+    await setDoc(
+      doc(db, "profiles", user.uid),
+      {
+        name: user.displayName ?? "",
+        email: user.email ?? "",
+        photoURL: user.photoURL ?? "",
+        provider: provider,
+        updatedAt: serverTimestamp(),
       },
-    }
-  });
-  
-  return { data, error };
-}
+      { merge: true }
+    ); // Merge to avoid overwriting existing data
 
-export async function getProfile() {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { data: null, error: new Error('Not authenticated') };
-  
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', user.id)
-    .single();
-    
-  return { data, error };
+    return { user, error: null };
+  } catch (error) {
+    return { user: null, error };
+  }
+}
+export async function signOut() {
+  try {
+    await firebaseSignOut(auth);
+    return { error: null };
+  } catch (error) {
+    return { error };
+  }
 }

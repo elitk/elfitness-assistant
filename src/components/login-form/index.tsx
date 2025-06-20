@@ -1,12 +1,10 @@
-// src/components/auth/login-form/index.tsx
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 
 import { FcGoogle } from "react-icons/fc";
 import { FaGithub, FaFacebook } from "react-icons/fa";
-import { signIn, signInWithOAuth } from "@/lib/api/auth";
+import { signInWithOAuth } from "@/lib/api/auth";
 
 const LoginForm = () => {
   const [email, setEmail] = useState("");
@@ -14,31 +12,30 @@ const LoginForm = () => {
   const [loading, setLoading] = useState(false);
   const [oauthLoading, setOauthLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    setLoading(true);
+  // const handleSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   setError(null);
+  //   setLoading(true);
 
-    try {
-      const { error } = await signIn(email, password);
+  //   try {
+  //     const { error } = await signIn(email, password);
 
-      if (error) throw error;
+  //     if (error) throw error;
 
-      router.push("/dashboard");
-    } catch (err) {
-      setError("Invalid email or password");
-      console.error("Login error:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  //     router.push("/dashboard");
+  //   } catch (err) {
+  //     setError("Invalid email or password");
+  //     console.error("Login error:", err);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const handleOAuthLogin = async (
     provider: "google" | "github" | "facebook"
@@ -127,7 +124,7 @@ const LoginForm = () => {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit}>
+      <form >
         <div className="mb-4">
           <label htmlFor="email" className="block text-gray-400 mb-2">
             Email

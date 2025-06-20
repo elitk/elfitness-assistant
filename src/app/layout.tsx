@@ -36,8 +36,10 @@ export default function RootLayout({
         className={`${lexend.className} ${geistSans.variable} ${geistMono.variable} antialiased`}
         suppressHydrationWarning={true}
       >
-        <NavBar />
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          <NavBar />
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );

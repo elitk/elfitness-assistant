@@ -1,29 +1,35 @@
-import { supabase  } from '@/lib/supabase/client'
-import { Profile } from '@/types';
+import { auth, db } from "@/lib/firebase/firebaseClient";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { Profile } from "@/types";
 
 export async function getProfile() {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { data: null, error: new Error('Not authenticated') };
-    
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', user.id)
-      .single();
-      
-    return { data, error };
+  const user = auth.currentUser;
+  if (!user) return { data: null, error: new Error("Not authenticated") };
+
+  try {
+    const ref = doc(db, "profiles", user.uid);
+    const snapshot = await getDoc(ref);
+
+    if (!snapshot.exists()) {
+      return { data: null, error: new Error("Profile not found") };
+    }
+
+    return { data: snapshot.data(), error: null };
+  } catch (error) {
+    return { data: null, error };
   }
-  
-  export async function updateProfile(profile: Partial<Profile>) {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { data: null, error: new Error('Not authenticated') };
-    
-    const { data, error } = await supabase
-      .from('profiles')
-      .update(profile)
-      .eq('id', user.id)
-      .select()
-      .single();
-      
-    return { data, error };
+}
+
+export async function updateProfile(profile: Partial<Profile>) {
+  const user = auth.currentUser;
+  if (!user) return { data: null, error: new Error("Not authenticated") };
+
+  try {
+    const ref = doc(db, "profiles", user.uid);
+    await updateDoc(ref, profile);
+
+    return { data: profile, error: null };
+  } catch (error) {
+    return { data: null, error };
   }
+}

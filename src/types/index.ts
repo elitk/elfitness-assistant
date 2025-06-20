@@ -26,12 +26,17 @@ export interface PersonalInfo {
     id: string;
     name: string | null;
     avatar_url: string | null;
+    birth_date?: string | null     
+    gender?: 'male' | 'female' | 'other' | null
     weight: number | null;
     height: number | null;
     fitness_goal: string | null;
     goal_target: number | null;
+    experience_level?: 'beginner' | 'intermediate' | 'advanced' | null
     goal_date: string | null;
     created_at: string;
+    updated_at: string
+    goal?: string | null
   }
 
   export interface UserStats {

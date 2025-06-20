@@ -1,45 +1,32 @@
-'use client';
+"use client";
 
-import { useCallback, useState } from 'react';
-import Link from 'next/link';
-// import { Dumbbell } from 'lucide-react';
-import NavLink from './NavLink';
-import { useRouter } from 'next/navigation'
-import { supabase } from '@/lib/supabase/client';
-
+import { useCallback, useState } from "react";
+import Link from "next/link";
+import NavLink from "./NavLink";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function NavBar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const router = useRouter()
-  
-  
+  const router = useRouter();
+  const { signOut } = useAuth();
+
   const navItems = [
-    { href: '/dashboard', label: 'Dashboard' },
-    { href: '/workouts', label: 'Workouts' },
-    { href: '/progress', label: 'Progress' },
-    { href: '/profile', label: 'Profile' },
+    { href: "/dashboard", label: "Dashboard" },
+    { href: "/workouts", label: "Workouts" },
+    { href: "/progress", label: "Progress" },
+    { href: "/profile", label: "Profile" },
   ];
-  
+
   const handleLogout = useCallback(async () => {
-  
-    await supabase.auth.signOut();
-    await fetch('/auth/signout', { method: 'POST', credentials: 'include' });
-
-    // 2 – clean up anything you stored locally
-    localStorage.removeItem('fitnessCoachUserId')
-    sessionStorage.clear()
-
-    // 3 – re-render RSCs with the fresh (logged-out) state
-    router.replace('/login');
-
-  }, [router])
+    await signOut();
+    router.replace("/login");
+  }, [router, signOut]);
 
   return (
     <nav className="bg-[#121417] text-white py-4 px-6">
       <div className="max-w-7xl mx-auto flex justify-between items-center">
-
         <Link href="/dashboard" className="flex items-center space-x-2">
-          {/* TODO: Add icon */}
           <span className="font-bold text-xl">Icon</span>
           <span className="font-bold text-xl">FitCoach AI</span>
         </Link>
@@ -62,13 +49,24 @@ export default function NavBar() {
         </div>
 
         {/* Mobile menu button */}
-        <button 
+        <button
           className="md:hidden"
           onClick={() => setIsMenuOpen(!isMenuOpen)}
           aria-label="Toggle menu"
         >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+          <svg
+            className="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4 6h16M4 12h16M4 18h16"
+            />
           </svg>
         </button>
       </div>
@@ -77,9 +75,9 @@ export default function NavBar() {
       {isMenuOpen && (
         <div className="md:hidden pt-4 pb-3 px-6 space-y-3">
           {navItems.map((item) => (
-            <NavLink 
-              key={item.href} 
-              href={item.href} 
+            <NavLink
+              key={item.href}
+              href={item.href}
               mobile={true}
               onClick={() => setIsMenuOpen(false)}
             >
@@ -90,7 +88,7 @@ export default function NavBar() {
             Upgrade
           </button>
           <button
-            onClick={handleLogout}
+            onClick={signOut}
             className="px-4 py-2 rounded-md font-medium transition-colors border border-white/20 hover:bg-white/10"
           >
             Logout
